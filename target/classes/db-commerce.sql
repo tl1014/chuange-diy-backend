@@ -1,0 +1,46 @@
+
+USE chuange_diy;
+CREATE TABLE IF NOT EXISTS shop_user (
+ id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+ name VARCHAR(80) NOT NULL,
+ phone VARCHAR(30) NOT NULL,
+ address VARCHAR(300),
+ created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+ KEY idx_shop_user_phone(phone)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE IF NOT EXISTS diy_design (
+ id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+ user_id BIGINT NOT NULL,
+ title VARCHAR(100) NOT NULL,
+ wrist_cm DECIMAL(5,2),
+ total_price DECIMAL(10,2),
+ design_json LONGTEXT NOT NULL,
+ image_url VARCHAR(500) NULL,
+ created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+ CONSTRAINT fk_design_user FOREIGN KEY(user_id) REFERENCES shop_user(id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE IF NOT EXISTS shop_order (
+ id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+ order_no VARCHAR(40) NOT NULL UNIQUE,
+ user_id BIGINT NOT NULL,
+ design_id BIGINT NULL,
+ total_price DECIMAL(10,2) NOT NULL,
+ status VARCHAR(20) NOT NULL DEFAULT 'PENDING',
+ payment_method VARCHAR(30) DEFAULT 'SIMULATED',
+ paid_at DATETIME NULL,
+ address VARCHAR(300),
+ created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+ CONSTRAINT fk_order_user FOREIGN KEY(user_id) REFERENCES shop_user(id),
+ CONSTRAINT fk_order_design FOREIGN KEY(design_id) REFERENCES diy_design(id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE IF NOT EXISTS shop_order_item (
+ id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+ order_id BIGINT NOT NULL,
+ product_id BIGINT NOT NULL,
+ product_name VARCHAR(120) NOT NULL,
+ quantity INT NOT NULL,
+ unit_price DECIMAL(10,2) NOT NULL,
+ diameter_mm DECIMAL(6,2),
+ CONSTRAINT fk_shop_item_order FOREIGN KEY(order_id) REFERENCES shop_order(id),
+ CONSTRAINT chk_shop_item_quantity CHECK(quantity > 0)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
